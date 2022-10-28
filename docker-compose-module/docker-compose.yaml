@@ -1,0 +1,63 @@
+version: "3.3"
+services: 
+  mongodb:
+    image: 'mongo'
+    volumes: 
+      - data:/data/db #this is the syntax of the named volume
+        #environment: 
+        # MONGO_INITDB_ROOT_USERNAME: kar
+        # MONGO_INITDB_ROOT_PASSWORD: secret
+     
+    #for single value we use -
+    #for key value pair we don't need to use the -
+
+    #todefine the envfile in the in docker compose
+    # env_file:
+    #  - ./env/mongo.env  # this is the way we can specify the environment variable in a file 
+
+    #docker compose file automatically create network for the whole file so no ne
+    #ed to this
+      
+  #example docker command converted into the docker compose file
+  #docker run --name test_service
+  #-e MONGODB_USERNAME=max\
+  #-e MONGODB_PASSWORD=secret
+  #-v logs:/app/logs -named volume
+  #-v /users/logs bind  volumne
+  #-v /app/node_modules - ananymous volume
+  #--rm 
+  #-d
+  #--network goals-net
+  #-p 80:80
+  #backend
+  backend:
+    #syntax1
+    build: ./backend  # relative path where the docker file holds the 
+    #syntax 2 to defining the docker file  this can be used for more complex application
+    ports:
+      - '80:80'
+    volumes:
+      - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    
+    #depends_on : some time one container run before the container run for example backedn is depends on mongo db means first start mongodb container and then run the backend container 
+    depends_on:
+      - mongodb    #specify the service name
+        #build:
+        #context: ./backend
+        #dockerfile: Dockerfile
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src # we know the code changes happens contineously
+    stdin_open: true #used for open input option
+    tty: true #attaching the termoinal in the interactive mode even we start interactive mode
+    depends_on:
+      - backend
+#we need to specify the volume name if we use named volumes in the services
+volumes:
+  data: 
+  logs:
